@@ -147,7 +147,7 @@ class ActionModule(ActionBase):
             if key.startswith("ansible_") and key.endswith("_interpreter"):
                 task_vars[key] = localhost[key]
 
-    def run(self, tmp=None, task_vars=None):
+    async def run(self, tmp=None, task_vars=None):
         ''' generates params and passes them on to the rsync module '''
         # When modifying this function be aware of the tricky convolutions
         # your thoughts have to go through:
@@ -179,7 +179,7 @@ class ActionModule(ActionBase):
         # to our next invocation. Munged args are single use only.
         _tmp_args = self._task.args.copy()
 
-        result = super(ActionModule, self).run(tmp, task_vars)
+        result = await super(ActionModule, self).run(tmp, task_vars)
         del tmp  # tmp no longer has any effect
 
         # Store remote connection type
@@ -437,6 +437,6 @@ class ActionModule(ActionBase):
                 _tmp_args['rsync_opts'].append('--rsh=' + shlex_quote('buildah run --'))
 
         # run the module and store the result
-        result.update(self._execute_module('ansible.posix.synchronize', module_args=_tmp_args, task_vars=task_vars))
+        result.update(await self._execute_module('ansible.posix.synchronize', module_args=_tmp_args, task_vars=task_vars))
 
         return result
